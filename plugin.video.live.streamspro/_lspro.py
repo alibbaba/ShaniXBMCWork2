@@ -115,10 +115,6 @@ def getSources():
         try:
             if os.path.exists(favorites) == True:
                 addDir('Favorites','url',4, itemart , item_info)
-            if addon.getSetting("browse_xml_database") == "true":
-                addDir('XML Database','http://xbmcplus.xb.funpic.de/www-data/filesystem/',15, itemart , item_info)
-            if addon.getSetting("browse_community") == "true":
-                addDir('Community Files','community_files',16, itemart , item_info)
             if addon.getSetting("searchotherplugins") == "true":
                 addDir('Search Other Plugins','Search Plugins',25, itemart , item_info)
             if os.path.exists(source_file)==True:
@@ -232,11 +228,6 @@ def addSource(url=None):
         addon.setSetting('new_url_source', "")
         addon.setSetting('new_file_source', "")
         xbmc.executebuiltin("XBMC.Notification(LiveStreamsPro,New source added.,5000,"+icon+")")
-        if not url is None:
-            if 'xbmcplus.xb.funpic.de' in url:
-                xbmc.executebuiltin("XBMC.Container.Update(%s?mode=14,replace)" %sys.argv[0])
-            elif 'community-links' in url:
-                xbmc.executebuiltin("XBMC.Container.Update(%s?mode=10,replace)" %sys.argv[0])
         xbmc.executebuiltin("XBMC.Container.Refresh")
 
 def rmSource(name):
@@ -257,44 +248,6 @@ def rmSource(name):
                     b.close()
                     break
         xbmc.executebuiltin("XBMC.Container.Refresh")
-
-def get_xml_database(url, browse=False):
-        if url is None:
-            url = 'http://xbmcplus.xb.funpic.de/www-data/filesystem/'
-        soup = BeautifulSoup(makeRequest(url), convertEntities=BeautifulSoup.HTML_ENTITIES)
-        for i in soup('a'):
-            href = i['href']
-            if not href.startswith('?'):
-                name = i.string
-                if name not in ['Parent Directory', 'recycle_bin/']:
-                    if href.endswith('/'):
-                        if browse:
-                            addDir(name,url+href,15,icon,fanart,'','','')
-                        else:
-                            addDir(name,url+href,14,icon,fanart,'','','')
-                    elif href.endswith('.xml'):
-                        if browse:
-                            addDir(name,url+href,1,icon,fanart,'','','','','download')
-                        else:
-                            if os.path.exists(source_file)==True:
-                                if name in SOURCES:
-                                    addDir(name+' (in use)',url+href,11,icon,fanart,'','','','','download')
-                                else:
-                                    addDir(name,url+href,11,icon,fanart,'','','','','download')
-                            else:
-                                addDir(name,url+href,11,icon,fanart,'','','','','download')
-
-
-def getCommunitySources(browse=False):
-        url = 'http://community-links.googlecode.com/svn/trunk/'
-        soup = BeautifulSoup(makeRequest(url), convertEntities=BeautifulSoup.HTML_ENTITIES)
-        files = soup('ul')[0]('li')[1:]
-        for i in files:
-            name = i('a')[0]['href']
-            if browse:
-                addDir(name,url+name,1,icon,fanart,'','','','','download')
-            else:
-                addDir(name,url+name,11,icon,fanart,'','','','','download')
 
 def getSoup(url,data=None):
         global viewmode,tsdownloader, hlsretry
@@ -2641,33 +2594,7 @@ def playsetresolved(url,name,iconimage,setresolved=True,reg=None):
         xbmc.executebuiltin('XBMC.RunPlugin('+url+')')
 
 
-## Thanks to daschacka, an epg scraper for http://i.teleboy.ch/programm/station_select.php
-##  http://forum.xbmc.org/post.php?p=936228&postcount=1076
-def getepg(link):
-        url=urllib.urlopen(link)
-        source=url.read()
-        url.close()
-        source2 = source.split("Jetzt")
-        source3 = source2[1].split('programm/detail.php?const_id=')
-        sourceuhrzeit = source3[1].split('<br /><a href="/')
-        nowtime = sourceuhrzeit[0][40:len(sourceuhrzeit[0])]
-        sourcetitle = source3[2].split("</a></p></div>")
-        nowtitle = sourcetitle[0][17:len(sourcetitle[0])]
-        nowtitle = nowtitle.encode('utf-8')
-        return "  - "+nowtitle+" - "+nowtime
-
-
-def get_epg(url, regex):
-        data = makeRequest(url)
-        try:
-            item = re.findall(regex, data)[0]
-            return item
-        except:
-            addon_log('regex failed')
-            addon_log(regex)
-            return
-
-    
+   
 ##not a generic implemenation as it needs to convert            
 def d2x(d, root="root",nested=0):
 
