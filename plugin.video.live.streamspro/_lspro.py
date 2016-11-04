@@ -2196,19 +2196,6 @@ def urlsolver(url):
         pDialog.close()
         return
 
-def tryplay2(url,listitem,pdialogue=None):    
-
-        print 'playing via runplugin'
-        xbmc.executebuiltin('XBMC.RunPlugin('+url+')') 
-        for i in range(8):
-            xbmc.sleep(500) ##sleep for 10 seconds, half each time
-            try:
-                #print 'condi'
-                if xbmc.getCondVisibility("Player.HasMedia") and xbmc.Player().isPlaying():
-                    return True
-            except: pass
-        print 'returning now'
-        return False
 def tryplay(url,listitem,pdialogue=None):    
     xbmc.log("[addon.live.streamspro-%s]: %s" %('Failed attempt', url),xbmc.LOGNOTICE)
     if url.lower().startswith('plugin') and 'youtube' not in  url.lower():
@@ -3218,5 +3205,6 @@ def main():
         pluginquerybyJSON(url)
         #xbmcplugin.endOfDirectory(int(sys.argv[1]))
     if not viewmode==None:
+       print 'setting view mode'
        xbmc.executebuiltin("Container.SetViewMode(%s)"%viewmode)
         
