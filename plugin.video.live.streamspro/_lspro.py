@@ -400,6 +400,8 @@ def getepgcontent(url,now,cachefor=24,filefromzip=None):
         regvalidfor = nowstrplus14h.strftime(format)
 
         filedata = ''
+        if not xbmcvfs.exists(LivewebTVepg):
+            xbmcvfs.mkdir(LivewebTVepg)        
         if filefromzip:
             addon_log("[addon.live.streamspro-%s]: %s" %('filefromzip ', str(filefromzip)),xbmc.LOGNOTICE)
             filename = os.path.join(LivewebTVepg,cacheKey(url))
@@ -663,8 +665,6 @@ def getData(url,fanart, data=None):
                         if disableepg == 'true' :
                             map(getItems,soup('epgitem'),[fanart])
                         else:
-                            if not xbmcvfs.exists(LivewebTVepg):
-                                xbmcvfs.mkdir(LivewebTVepg)
                             progress = xbmcgui.DialogProgress()
                             progress.create('Progress', 'EPGitem found')
         
