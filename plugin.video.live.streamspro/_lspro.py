@@ -2093,11 +2093,14 @@ def getCookieJar(COOKIEFILE):
 
     return cookieJar
 
+
 def doEval(fun_call,page_data,Cookie_Jar,m,functions_dir=None):
     ret_val=''
     #print fun_call
-    if functions_dir not in sys.path and not functions_dir:
-        sys.path.append(functions_dir)
+    if not functions_dir:
+        functions_dir = profile
+    if functions_dir not in sys.path:
+        sys.path.insert(0,functions_dir)
 
 #    print fun_call
     try:
@@ -2119,8 +2122,10 @@ def doEval(fun_call,page_data,Cookie_Jar,m,functions_dir=None):
 def doEvalFunction(fun_call,page_data,Cookie_Jar,m,functions_dir=None):
 #    print 'doEvalFunction'
     ret_val=''
-    if functions_dir not in sys.path and not functions_dir:
-        sys.path.append(functions_dir)
+    if not functions_dir:
+        functions_dir = profile
+    if functions_dir not in sys.path :
+        sys.path.insert(0,functions_dir)
         
     f=open(os.path.join(functions_dir,'LSProdynamicCode.py'),"wb")
     f.write("# -*- coding: utf-8 -*-\n")
