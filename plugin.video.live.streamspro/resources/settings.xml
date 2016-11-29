@@ -24,10 +24,13 @@
     <setting id="searchotherplugins" label="Search Other plugins" type="bool" default="false"/>
   </category>
 
-  <category label=".xml Database">
-    <setting id="browse_xml_database" type="bool" label="Browse and play from .xml Database" default="false"/>
-    <setting type="action" label="Add .xml Database Sources" option="close" action="Container.Update(plugin://plugin.video.live.streamspro/?mode=14)" />
-  </category>
+  <category label="EPG/.TS/HLS">
+    <setting id="disableepg" label="Disable EPG" type="bool" default="false"/>
+    <setting id="gmtfrom" type="text" label="GMT" default="5" />  
+    <setting id="tsdownloader" label="Enable this if you get trouble playing m3u" type="bool" default="false"/>
+    <setting id="hlsretry" label="Enable this if you get trouble playing m3u8 file" type="bool" default="false"/>
+    
+   </category>
   <category label="Community Files">
     <setting id="browse_community" type="bool" label="Browse and play from Community Files" default="false"/>
     <setting type="action" label="Add Community File URL as Source" option="close" action="Container.Update(plugin://plugin.video.live.streamspro/?mode=10)" />
