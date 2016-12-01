@@ -672,7 +672,7 @@ def getData(url,fanart, data=None):
                             format2 = "%Y-%m-%d %H:%M:%S"
                             format = "%Y%m%d%H%M%S"
                             # soup is prepared so use soup instead of re
-                            epglink = soup('epg')[0].get('link')
+                            epglink = soup('epg')[0].get('tvgurl')
                       
                             if epglink:
 
