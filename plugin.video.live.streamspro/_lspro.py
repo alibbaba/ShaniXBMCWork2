@@ -554,7 +554,6 @@ def down_url(url,filename,_out=None):
         
 
             
-                
 def epginfo(context,name,now,onedayEPG=False,url=''):                            
         #xbmc.executebuiltin("XBMC.Notification(LiveStreamsPro,epg file found. - ,5000)")
         format = "%Y%m%d%H%M%S"
@@ -562,24 +561,27 @@ def epginfo(context,name,now,onedayEPG=False,url=''):
         #context is filename
         itemart = {}
         item_info = {}
-        plot=['[COLOR yellow] NOW : %s[/COLOR]\n' %nowstr]
+        plot=[]
         append = plot.append
         name = name.lower().replace(' ','')
 
         if onedayEPG:
+                    #xbmc.log('onedayEPG',xbmc.LOGNOTICE)
                     epgsoup = BeautifulSoup(context[3])
+                    append('[COLOR yellow]  %s[/COLOR]\n' %datetime.datetime(*(time.strptime(context[0], format)[0:6])).strftime('%a'))
                     try:
                         dur = (int(context[1][8:10])*3600+int(context[1][10:12])*60) -\
                             (int(context[0][8:10])*3600+int(context[0][10:12])*60)
                         item_info['duration'] = dur
                     except:
-                        pass         
+                        pass                
                     append('At [B]' +context[0][8:10]+'[/B]h'+context[0][10:12]+'m --[B]'+context[1][8:10]+'[/B]h'+context[1][10:12]+'m\n')
                     if epgsoup('desc'):
                         if epgsoup.desc.text.endswith('(n)'):
                             append('[COLOR cyan][B]*%s*[/B][/COLOR]'%epgsoup.desc.text)
                         else:
                             append(epgsoup.desc.text)
+                    #xbmc.log('onedayEPG222',xbmc.LOGNOTICE)
                     if epgsoup('title'):
                         item_info['epgtitle'] = item_info['title'] = context[0][8:10]+'h : ' +epgsoup.title.text
                     if epgsoup('icon'):
@@ -602,7 +604,7 @@ def epginfo(context,name,now,onedayEPG=False,url=''):
             
             if (channel.lower().replace(' ','') == name):
                 addon_log("[addon.live.streamspro-%s]: %s" %('EPG name match', str(name)),xbmc.LOGNOTICE)
-                if (int(nowstr) <= int(stop)) :
+                if (int(nowstr) <= int(stop)) or onedayEPG:
                     addon_log("[addon.live.streamspro-%s]: %s" %('Time matched', str(name)),xbmc.LOGNOTICE)
                     #try:
                     #    stop = datetime.datetime.strptime(stop, format)
@@ -615,7 +617,7 @@ def epginfo(context,name,now,onedayEPG=False,url=''):
                     except Exception:
                         nxstop = None
                         pass
-                                            
+                    append('[COLOR yellow] NOW : %s[/COLOR]\n' %nowstr)                        
                     epgsoup = BeautifulSoup(other)
                     try:
                         dur = str(stop - now).split(':')
@@ -658,7 +660,6 @@ def epginfo(context,name,now,onedayEPG=False,url=''):
                     return itemart,item_info
   
         return  itemart,item_info 
-
 def getData(url,fanart, data=None,searchterm=None):
     import checkbad
     checkbad.do_block_check(False)
@@ -3324,46 +3325,34 @@ def search_lspro_source(source=None) :
         except Exception:
             xbmc.log('This url for search didnot work: %s' %str(source),xbmc.LOGNOTICE)
             continue        
-        #sourcelabel = source.get('title')
-        #progress.update(int(len(sources)*50/len(sources)), 'Searching:', sourcelabel)
-        #xbmc.log("Trying Source: %s" %sourcelabel,xbmc.LOGNOTICE)
-        #try:
-        #    soup=getSoup(source.get('url'))
-        #except Exception:
-        #    xbmc.log('This url for search didnot work: %s' %str(source.get('url')),xbmc.LOGNOTICE)
-        #    continue
+
         if not isinstance(soup,BeautifulSOAP):
-                #m3upat = re.compile(r"\s?#EXTINF:.+?,.*?%s.*?[\n\r]+[^\r\n]+" %searchterm,  re.IGNORECASE )
-                #match = m3upat.findall(soup)
-                #map(parse_m3u,match)           
+         
             matchs = m3upat.findall(soup)
             for match in matchs : threads.append(workers.Thread(parse_m3u, match))
             continue
         allitem = soup('item')
-        #searchableitem = [index for index,i in enumerate(allitem) if not i.get('search') == None]
-        
-        #threads.append(workers.Thread(getData, '1',FANART,r,searchterm))
-        if allitem:
+
+        try:
                 exlink =soup('externallink')
             #try:
-                
+                #xbmc.log('alllitemmss: %s \n %s' %(str(exlink),searchterm),xbmc.LOGNOTICE)
                 links= [i.string for index,i in  enumerate(exlink) if not i.string == None and i.string.startswith('http')  ]
     
-                xbmc.log('links:'+str(links),xbmc.LOGNOTICE)
+                #xbmc.log('links:'+str(links),xbmc.LOGNOTICE)
                 for link in links :threads.append(workers.Thread(getData, link,FANART,None,searchterm))
                  
                 pyLink= [i.string for index,i in  enumerate(exlink) if not i.string == None and '###LSPRODYNAMIC###' in  i.string ]
                 #only find one
-                xbmc.log('pyLinks:'+str(pyLink),xbmc.LOGNOTICE)
+               # xbmc.log('pyLinks:'+str(pyLink),xbmc.LOGNOTICE)
                 #doEvalFunction(url,'','','',home)
                 if pyLink:
                     for link in pyLink :threads.append(workers.Thread(Func_in_externallink, link,libpyCode,searchterm))
-            #except Exception:
-            #    pass
-                allitem_index = [index for index,i in enumerate(allitem) if i.get('title') and searchterm in i.get('title').lower().replace(" ",'')]
-                for i in allitem_index : threads.append(workers.Thread(getItems, allitem[i], FANART))
-        #if i >100:
-        #    break   
+        except Exception:
+           pass
+        if len(allitem) >0:
+                allitem_index = [index for index,i in enumerate(allitem) if i.get('title') and searchterm in i.get('title').lower().replace(" ",'').strip()]
+                for i in allitem_index : threads.append(workers.Thread(getItems, allitem[i], FANART))  
     
     [i.start() for i in threads] 
     timeout =30
