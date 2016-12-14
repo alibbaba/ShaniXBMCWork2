@@ -980,7 +980,7 @@ def getItems(item,fanart,itemart={},item_info={},total=1):
                 else:
                         raise
             except:
-                traceback.print_exc()
+                #traceback.print_exc()
                 addon_log('No EPG for %s' %name)
                 pass
             try:
@@ -1174,6 +1174,7 @@ def getItems(item,fanart,itemart={},item_info={},total=1):
                             addLink(url[0],name.encode('utf-8', 'ignore'),itemart,item_info,regexs,total)
                     #print 'success'
             except:
+                #traceback.print_exc()
                 addon_log('There was a problem adding item - '+name.encode('utf-8', 'ignore'))
 
 def parse_regex(reg_item):
