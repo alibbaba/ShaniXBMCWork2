@@ -567,20 +567,19 @@ def epginfo(context,name,now,onedayEPG=False,url=''):
         name = name.lower().replace(' ','')
 
         if onedayEPG:
-                    xbmc.log('onedayEPG',xbmc.LOGNOTICE)
                     epgsoup = BeautifulSoup(context[3])
                     try:
-                        dur = str(context[0] - now).split(':')
-                        item_info['duration'] = str(int(dur[0])*3600 + int(dur[1])*60)
+                        dur = (int(context[1][8:10])*3600+int(context[1][10:12])*60) -\
+                            (int(context[0][8:10])*3600+int(context[0][10:12])*60)
+                        item_info['duration'] = dur
                     except:
-                        pass                
-                    append('At ' +context[0][8:10]+'h'+context[0][10:12]+'m --'+context[1][8:10]+'h'+context[0][10:12]+'m\n')
+                        pass         
+                    append('At [B]' +context[0][8:10]+'[/B]h'+context[0][10:12]+'m --[B]'+context[1][8:10]+'[/B]h'+context[1][10:12]+'m\n')
                     if epgsoup('desc'):
                         if epgsoup.desc.text.endswith('(n)'):
                             append('[COLOR cyan][B]*%s*[/B][/COLOR]'%epgsoup.desc.text)
                         else:
                             append(epgsoup.desc.text)
-                    xbmc.log('onedayEPG222',xbmc.LOGNOTICE)
                     if epgsoup('title'):
                         item_info['epgtitle'] = item_info['title'] = context[0][8:10]+'h : ' +epgsoup.title.text
                     if epgsoup('icon'):
@@ -603,7 +602,7 @@ def epginfo(context,name,now,onedayEPG=False,url=''):
             
             if (channel.lower().replace(' ','') == name):
                 addon_log("[addon.live.streamspro-%s]: %s" %('EPG name match', str(name)),xbmc.LOGNOTICE)
-                if (int(nowstr) <= int(stop)) or onedayEPG:
+                if (int(nowstr) <= int(stop)) :
                     addon_log("[addon.live.streamspro-%s]: %s" %('Time matched', str(name)),xbmc.LOGNOTICE)
                     #try:
                     #    stop = datetime.datetime.strptime(stop, format)
@@ -792,16 +791,15 @@ def parse_m3u(data, url=None, g_name=None):
     item_info ={}
     if  groupm3ulinks == 'true' :
         if 'group-title' in content and g_name is None :
-    
-        print 'found group-title'
-        groups = re.compile('group-title=[\'"](.*?)[\'"]').findall(content)
-        #addon_log(str(content),xbmc.LOGNOTICE  )
-        for group in set(groups):
-            group_name = group
-            addDir(group_name,url,2,itemart,item_info)
-        if re.search(r"^[\s]*#((?!title=).)*$", content, re.IGNORECASE | re.MULTILINE):
-            addDir("No Group-title",url,2,itemart,item_info)
-        return    
+            groups = re.compile('group-title=[\'"](.*?)[\'"]').findall(content)
+            #addon_log(str(content),xbmc.LOGNOTICE  )
+            if set(groups) > 2:
+                for group in set(groups):
+                    group_name = group
+                    addDir(group_name,url,2,itemart,item_info)
+                if re.search(r"^[\s]*#((?!title=).)*$", content, re.IGNORECASE | re.MULTILINE):
+                    addDir("No Group-title",url,2,itemart,item_info)
+                return    
         elif re.search(r"^[\s]*#EXTINF.*?,[\s]*([\w\s]+)[\s]*:[^/]", content, re.IGNORECASE | re.MULTILINE)and g_name is None:
             groups = re.compile(r"^[\s]*#EXTINF.*?,[\s]*([\w\s]+)[\s]*:[^/]", re.IGNORECASE | re.MULTILINE).findall(content)
             if set(groups) > 2 :
@@ -810,7 +808,7 @@ def parse_m3u(data, url=None, g_name=None):
                     addDir(group_name,url,2,itemart,item_info)
                 if re.search(r"^[\s]*#((?!title=).)*$", content, re.IGNORECASE | re.MULTILINE):
                     addDir("No category",url,2,itemart,item_info)
-                return     
+                return    
     if g_name:
         if g_name == 'No Group-title':
             match = re.compile(r"^[\s]*#EXTINF(((?!group-title=).)*),(.*?)[\n\r]+([^\r\n]+)",re.IGNORECASE|re.MULTILINE).findall(content)
@@ -946,7 +944,7 @@ def getItems(item,fanart,itemart={},item_info={},total=1):
 
             try:
                 if item('itemepg') and not disableepg == 'true' :
-                    #xbmc.executebuiltin("XBMC.Notification(LiveStreamsPro,epg file found. - ,5000)")
+                    xbmc.executebuiltin("XBMC.Notification(LiveStreamsPro,epg file found. - ,5000)")
                     format = "%Y%m%d%H%M%S"
                     houroffset = item('itemepg')[0].get('tvgshift') or 0
                     offset = datetime.timedelta(hours=float(houroffset))
@@ -961,15 +959,16 @@ def getItems(item,fanart,itemart={},item_info={},total=1):
                     #if item.epg.get('updateafterhour'):
                     updateafterhour = item('itemepg')[0].get('updateafterhour','20')
                     epgfile = item('itemepg')[0].get('epgfile','0')
-                    addon_log("[addon.live.streamspro-%s]: %s" %('Getting EPGCONTENT for:', str(name)),xbmc.LOGNOTICE)
+                    xbmc.log("[addon.live.streamspro-%s]: %s" %('Getting EPGCONTENT for:', str(name)),xbmc.LOGNOTICE)
                     if not epgfile== '0':
-                        #xbmc.log("[addon.live.streamspro-%s]: %s" %('Getting EdddPGCONTENT for:', str(name)),xbmc.LOGNOTICE)
+                        xbmc.log("[addon.live.streamspro-%s]: %s" %('Getting EdddPGCONTENT for:', str(name)),xbmc.LOGNOTICE)
                         context = getepgcontent(epglink,now,int(updateafterhour),epgfile)
                     else:
                         context = getepgcontent(epglink,now,int(updateafterhour))
                     if context:
                         epgname = item('itemepg')[0].get('name') or name 
                         itemart,item_info = epginfo(context,epgname,now)
+                        xbmc.log(str(item_info),xbmc.LOGNOTICE)
                         if item_info.get('epgtitle') is not None:
                             item_info['tvgurl'] = urllib.quote_plus(epglink)
                             item_info['epgfile'] = urllib.quote_plus(epgfile) 
@@ -980,7 +979,7 @@ def getItems(item,fanart,itemart={},item_info={},total=1):
                 else:
                         raise
             except:
-            #    traceback.print_exc()
+                traceback.print_exc()
                 addon_log('No EPG for %s' %name)
                 pass
             try:
@@ -1131,31 +1130,31 @@ def getItems(item,fanart,itemart={},item_info={},total=1):
                     regexs = parse_regex(reg_item)
                 except:
                     pass
-            try:
+            #try:
+            
+            if len(url) > 1:
+                alt = 0
+                playlist = []
+                ignorelistsetting=True if '$$LSPlayOnlyOne$$' in url[0] else False
                 
-                if len(url) > 1:
-                    alt = 0
-                    playlist = []
-                    ignorelistsetting=True if '$$LSPlayOnlyOne$$' in url[0] else False
-                    
-                    for i in url:
-                            if  add_playlist == "false" and not ignorelistsetting:
-                                alt += 1
-                                addLink(i,'%s) %s' %(alt, name.encode('utf-8', 'ignore')),itemart,item_info,regexs,total)
-                            elif  (add_playlist == "true" and  ask_playlist_items == 'true') or ignorelistsetting:
-                                if regexs:
-                                    playlist.append(i+'&regexs='+regexs)
-                                elif  any(x in i for x in resolve_url) and  i.startswith('http'):
-                                    playlist.append(i+'&mode=19')
-                                else:
-                                    playlist.append(i)
+                for i in url:
+                        if  add_playlist == "false" and not ignorelistsetting:
+                            alt += 1
+                            addLink(i,'%s) %s' %(alt, name.encode('utf-8', 'ignore')),itemart,item_info,regexs,total)
+                        elif  (add_playlist == "true" and  ask_playlist_items == 'true') or ignorelistsetting:
+                            if regexs:
+                                playlist.append(i+'&regexs='+regexs)
+                            elif  any(x in i for x in resolve_url) and  i.startswith('http'):
+                                playlist.append(i+'&mode=19')
                             else:
                                 playlist.append(i)
-                    
-                    if len(playlist) > 1:
-                        item_info['playlist'] = playlist
-                        addLink('', name.encode('utf-8'),itemart,item_info,regexs,total)
-                else:
+                        else:
+                            playlist.append(i)
+                
+                if len(playlist) > 1:
+                    item_info['playlist'] = playlist
+                    addLink('', name.encode('utf-8'),itemart,item_info,regexs,total)
+            else:
                     if isXMLSource:
                             if not regexs == None: #<externallink> and <regex>
                                 item_info['showcontext'] = '!!update'
@@ -1173,8 +1172,8 @@ def getItems(item,fanart,itemart={},item_info={},total=1):
                         
                         addLink(url[0],name.encode('utf-8', 'ignore'),itemart,item_info,regexs,total)
                     #print 'success'
-            except:
-                addon_log('There was a problem adding item - '+name.encode('utf-8', 'ignore'))
+            #except:
+            #    addon_log('There was a problem adding item - '+name.encode('utf-8', 'ignore'))
 
 def parse_regex(reg_item):
                 try:
@@ -3158,6 +3157,7 @@ def addLink(url,name,itemart,item_info,regexs=None,total=1,setCookie=""):
                 contextMenu.append(
                     ('What\'s on Today','Container.Update(%s?mode=26&url=%s&name=%s,return)'
                      %(sys.argv[0], urllib.quote_plus(url), urllib.quote_plus(name.split('::')[0])))
+                     )
             if showcontext == 'fav':
                 contextMenu.append(
                     ('Remove from LiveStreamsPro Favorites','XBMC.RunPlugin(%s?mode=6&name=%s)'
@@ -3804,24 +3804,16 @@ def main():
             epgxml = os.path.join(extracted_dir,epgfile)
             epgfilewithreg = os.path.join(extracted_dir,cacheKey(epgxml)+'_regfor')
         
-        xbmc.log(str(epgfilewithreg),xbmc.LOGNOTICE)
-        xbmc.log(str(sys.argv),xbmc.LOGNOTICE)
+        #xbmc.log(str(sys.argv),xbmc.LOGNOTICE)
         filedata = open(epgfilewithreg).read()
         context = json.loads(filedata.encode('utf-8','ignore'))
-        #sh = [(i[0][8:],re_me(i[2],r'title.*?>([^<]+)') )for i in context if i[1].lower().replace(' ','') == name.lower().replace(' ','')]
         sh = [i for i in context if i[2].lower().replace(' ','') == name.lower().replace(' ','')]
-        xbmc.log('url type: '+str(sh) + name,xbmc.LOGNOTICE)
+        #xbmc.log('url type: '+str(sh) + name,xbmc.LOGNOTICE)
         
         
         
         for i in range(0,len(sh)):
                  itemart,item_info=epginfo(sh[i], name, now, onedayEPG=True)
-                 #xbmc.log(str(itemart),xbmc.LOGNOTICE)
-                 #xbmc.log(str(type(itemart)),xbmc.LOGNOTICE)
-                 #xbmc.log(str(item_info),xbmc.LOGNOTICE)
-                 #xbmc.log(str(type(item_info)),xbmc.LOGNOTICE)
-                 #if item_info.get('epgtitle') is not None :
-                 #    name = name + '\n' + item_info.get('epgtitle')
                  addLink(url,name,itemart,item_info)        
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
     elif mode==55:
