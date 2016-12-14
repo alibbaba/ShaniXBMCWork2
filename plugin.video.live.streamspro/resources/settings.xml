@@ -2,7 +2,6 @@
   <category label="General">
     <setting id="save_location" type="folder"  label="Select a download location." default=""/>
     <setting id="use_thumb" type="bool" label="Use Thumbnails as Fanart" default="false" />
-    <setting id="logo-folderPath" type="folder"  label="Select Directory for logo." default=""/>
     <setting id="add_playlist" type="bool" label="Add items with multiple links as play lists" default="false"/>
     <setting id="ask_playlist_items" type="bool" label="Ask playlist items to choose from dialog" default="false" />
     <setting id="debug" type="bool" label="Enable Add-on Debugging" default="false"/>
@@ -25,6 +24,9 @@
   </category>
 
   <category label="EPG/.TS/HLS">
+    <setting id="logo_folderPath" type="folder"  label="Select Directory for logo.Match LogoFile with Title" default=""/>    
+    <setting id="groupm3ulinks" type="bool"  label="Group Channel for m3u links by Country" default="false"/>
+  
     <setting id="disableepg" label="Disable EPG" type="bool" default="false"/>
     <setting id="gmtfrom" type="text" label="GMT" default="5" />  
     <setting id="tsdownloader" label="Enable this if you get trouble playing m3u" type="bool" default="false"/>
