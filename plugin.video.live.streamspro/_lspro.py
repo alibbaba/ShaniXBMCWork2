@@ -945,7 +945,7 @@ def getItems(item,fanart,itemart={},item_info={},total=1):
 
             try:
                 if item('itemepg') and not disableepg == 'true' :
-                    xbmc.executebuiltin("XBMC.Notification(LiveStreamsPro,epg file found. - ,5000)")
+                    #xbmc.executebuiltin("XBMC.Notification(LiveStreamsPro,epg file found. - ,5000)")
                     format = "%Y%m%d%H%M%S"
                     houroffset = item('itemepg')[0].get('tvgshift') or 0
                     offset = datetime.timedelta(hours=float(houroffset))
@@ -1131,50 +1131,50 @@ def getItems(item,fanart,itemart={},item_info={},total=1):
                     regexs = parse_regex(reg_item)
                 except:
                     pass
-            #try:
-            
-            if len(url) > 1:
-                alt = 0
-                playlist = []
-                ignorelistsetting=True if '$$LSPlayOnlyOne$$' in url[0] else False
-                
-                for i in url:
-                        if  add_playlist == "false" and not ignorelistsetting:
-                            alt += 1
-                            addLink(i,'%s) %s' %(alt, name.encode('utf-8', 'ignore')),itemart,item_info,regexs,total)
-                        elif  (add_playlist == "true" and  ask_playlist_items == 'true') or ignorelistsetting:
-                            if regexs:
-                                playlist.append(i+'&regexs='+regexs)
-                            elif  any(x in i for x in resolve_url) and  i.startswith('http'):
-                                playlist.append(i+'&mode=19')
+            try:
+
+                if len(url) > 1:
+                    alt = 0
+                    playlist = []
+                    ignorelistsetting=True if '$$LSPlayOnlyOne$$' in url[0] else False
+
+                    for i in url:
+                            if  add_playlist == "false" and not ignorelistsetting:
+                                alt += 1
+                                addLink(i,'%s) %s' %(alt, name.encode('utf-8', 'ignore')),itemart,item_info,regexs,total)
+                            elif  (add_playlist == "true" and  ask_playlist_items == 'true') or ignorelistsetting:
+                                if regexs:
+                                    playlist.append(i+'&regexs='+regexs)
+                                elif  any(x in i for x in resolve_url) and  i.startswith('http'):
+                                    playlist.append(i+'&mode=19')
+                                else:
+                                    playlist.append(i)
                             else:
                                 playlist.append(i)
+
+                    if len(playlist) > 1:
+                        item_info['playlist'] = playlist
+                        addLink('', name.encode('utf-8'),itemart,item_info,regexs,total)
+                else:
+                        if isXMLSource:
+                                if not regexs == None: #<externallink> and <regex>
+                                    item_info['showcontext'] = '!!update'
+                                    addDir(name.encode('utf-8'),ext_url[0].encode('utf-8'),1,itemart,item_info,regexs,url[0].encode('utf-8'))
+                                #addLink(url[0],name.encode('utf-8', 'ignore')+  '[COLOR yellow]build XML[/COLOR]',thumbnail,fanArt,desc,genre,date,True,None,regexs,total)
+                                else:
+                                    item_info['showcontext'] = 'source'
+                                    addDir(name.encode('utf-8'),ext_url[0].encode('utf-8'),1,itemart,item_info)
+                                #addDir(name.encode('utf-8'),url[0].encode('utf-8'),1,thumbnail,fanart,desc,genre,date,None,'source')
+                        elif isJsonrpc:
+                            item_info['showcontext'] = 'source'
+                            addDir(name.encode('utf-8'),ext_url[0],53,itemart,item_info)
+                            #xbmc.executebuiltin("Container.SetViewMode(500)")
                         else:
-                            playlist.append(i)
-                
-                if len(playlist) > 1:
-                    item_info['playlist'] = playlist
-                    addLink('', name.encode('utf-8'),itemart,item_info,regexs,total)
-            else:
-                    if isXMLSource:
-                            if not regexs == None: #<externallink> and <regex>
-                                item_info['showcontext'] = '!!update'
-                                addDir(name.encode('utf-8'),ext_url[0].encode('utf-8'),1,itemart,item_info,regexs,url[0].encode('utf-8'))
-                            #addLink(url[0],name.encode('utf-8', 'ignore')+  '[COLOR yellow]build XML[/COLOR]',thumbnail,fanArt,desc,genre,date,True,None,regexs,total)
-                            else:
-                                item_info['showcontext'] = 'source'
-                                addDir(name.encode('utf-8'),ext_url[0].encode('utf-8'),1,itemart,item_info)
-                            #addDir(name.encode('utf-8'),url[0].encode('utf-8'),1,thumbnail,fanart,desc,genre,date,None,'source')
-                    elif isJsonrpc:
-                        item_info['showcontext'] = 'source'
-                        addDir(name.encode('utf-8'),ext_url[0],53,itemart,item_info)
-                        #xbmc.executebuiltin("Container.SetViewMode(500)")
-                    else:
-                        
-                        addLink(url[0],name.encode('utf-8', 'ignore'),itemart,item_info,regexs,total)
+
+                            addLink(url[0],name.encode('utf-8', 'ignore'),itemart,item_info,regexs,total)
                     #print 'success'
-            #except:
-            #    addon_log('There was a problem adding item - '+name.encode('utf-8', 'ignore'))
+            except:
+                addon_log('There was a problem adding item - '+name.encode('utf-8', 'ignore'))
 
 def parse_regex(reg_item):
                 try:
